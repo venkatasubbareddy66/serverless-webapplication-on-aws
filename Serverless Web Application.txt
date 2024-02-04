@@ -216,3 +216,9 @@ Do integrate with ur lambda function with dynamodb
 
 -- do change accourding to ur values in index.html , css file and script.js
 
+
+
+
+
+NOte : copy url in js file n try to check o/p , whether the views is incresing or not 
+
