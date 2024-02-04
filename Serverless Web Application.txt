@@ -1,0 +1,218 @@
+
+
+
+
+
+Project Name : server-less web Application On AWS
+
+-- In this application , you will build a server less web applications by using lambda , Dynamodb, and S3 
+
+
+Steps to build this project 
+
+
+-- create a Dynamodb table to store the item
+
+-- Build a Lambda function to handle the CRUD operations on the Dynamodb Table
+
+-- use s3 to store and host the web applications static files(HTML, CSS and javaScript)
+
+-- Create a CloudFront distribution to serve the s3-Hosted static files with low latency
+
+
+
+--------Procedure 
+
+Step 1: 
+
+
+-- we are doing server less web application
+
+-- here we are hosting static web application 
+
+-- for this we are going to store our html , css files in the S3 bucket , make sure bucket is private access 
+
+-- here we are not included any servers , this is totally server-less
+
+-- we are using Lambda, DynamoDb, And S3 bucket
+
+-- now create one s3 bucket and store ur html files , Css and java Script files
+
+
+Step 2 : 
+
+-- create Cloud Front Distribution , why I am using this is that I want to access my application without any latency , C.F uses CDN network and it works with Edge Locations for faster response without any latency
+
+-- open Cloud Front in AWS and create CF distribution
+
+-- choose s3 bucket as origin domain
+
+-- in origin access u should select , 2nd option (Origin access control settings (recommended))
+
+-- select ur OAC 
+
+-- rest leave default and create distribution
+
+-- once c.o create distribution u will get pop -up like to change policy in bucket so do copy policy and go to s3 permission of bucket and paste this policy to get read access from ur bucket and save changes according to that 
+
+-- it will take little time to setup distribution
+
+-- in distribution setting give default root object is index.html 
+
+-- wait until it get deployed successfully in (last modified) state
+
+
+ Step 3 : 
+
+
+-- open R53 and do create hosted zone 
+
+-- give name same as ur domain name 
+
+-- update ur name servers in your domain names management( go daddy, any others services)
+
+-- now go to Cloud Front do edit section , add ur domain name with any sub domain u want 
+
+For eg : mine is  welcome.subbucloud.lat
+
+-- if u have SSL certificates , u can add or request for new certificate in ACM
+
+-- open ACM Request for public certificate , give ur fully qualified domain
+
+Eg : *.subbucloud.lat
+
+* = like wildcard , all the thing that we have mentioned like sub-domains that will use with in same ACM 
+
+leave everything as default 
+
+-- it will some time to issue a certificate for u about 10-15 min time it will take 
+
+-- once the certificate  is issued do update in CF and save changes wait until it get deployed 
+
+-- open link of certificate in domains u will see create record with R53 c.o that it will create one CNAME record for u in R53 , it going to validate automatically 
+
+-- if u check in R53 it will create CNAME and validate automatically 
+
+-- create other record r53 records for sub-domain
+
+-- go to R53 and create record with A type 
+
+-- choose alias to CF and select ACM certificate in drop down menu
+
+-- after setup everything , now to enter ur domain in the browser to check the output 
+
+-- wait for sometime to get o/p
+
+-- getting 
+
+
+
+-- Step 4 
+
+
+-- go to Dynamodb table , create table 
+
+-- give table name as bucket name 
+
+-- give "id" as partition key , rest keep it as default 
+
+-- now what we are trying to do is we have static web application , we are going to make this as server less application 
+
+-- when ever the person visits , automatically the views will get increase without any servers 
+
+-- we are doing this with lambda function 
+
+-- go to dynamodb --> explore --> create item 
+
+Add 0 in id 
+
+Add new attribute name as "views" as Number Type give value as 1 and create item 
+
+--  go to IAM , u have to Crete one role and give dynamodb access to this role 
+
+-- IAM --> create role --> lambda(use case)--> give dynamodbfullaccess
+
+-- create role 
+
+
+
+
+
+
+-- step 5 
+
+
+-- search for Lambda 
+
+-- create lambda function , in function name as ur bucket name 
+
+-- select python 3.8
+
+-- in advance settings go and enable function Url
+
+-- select Auth Type is NONE and enable CORS
+
+-- check url it is working or not 
+
+-- now write ur own code 
+
+
+
+
+import json
+import boto3
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('serverlesswebapplication1234')
+def lambda_handler(event, context):
+    response = table.get_item(Key={
+        'id':'0'
+    })
+    views = response['Item']['views']
+    views = views + 1
+    
+    print(views)
+    
+    response = table.put_item(Item={
+        'id':'0',
+        'views': views
+    })
+    
+    return views
+
+
+
+-- after writing ur own code , do deploy and do test
+
+-- it will through u error 
+
+-- to avoid this error 
+
+-- go to lambda --> configurations --> permissions --> edit --> add role (u have created ) in step 4
+
+-- now execute function again 
+
+-- now u will able to get response 
+
+-- go to dynamodb and do refresh u will able to see response click views 
+
+-- this is how it works 
+
+
+
+
+--- Step 6 
+
+Do integrate with ur lambda function with dynamodb 
+
+-- in JS script change lambda URL of urs 
+
+-- here we have updated our js file and add the required thing in index.html file also 
+
+-- now as we have updated we have to upload again those files in the s3 again coz we have updated so do this 
+
+-- now do refresh ur browser , it will take some time to refresh the content
+
+--  u will able to see views 
+
+-- do change accourding to ur values in index.html , css file and script.js
+
